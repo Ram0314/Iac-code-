@@ -1,0 +1,73 @@
+provider.tf 
+
+provider "aws" {
+  region = "us-east-1"
+}
+----------------------------------------------------------------------------------
+main.tf
+
+resource "aws_instance" "devops" {
+  tags = {
+    Name = var.name
+  }
+
+  ami               = var.ami_id
+  instance_type     = var.itype
+  key_name          = var.ikey
+  availability_zone = var.izone
+  root_block_device {
+    volume_size = 10
+  }
+  vpc_security_group_ids = [aws_security_group.security.id]
+  count = 2
+}
+
+------------------------------------------------------------------
+variable.tf
+
+variable "name" {
+  type    = string
+  default = "devops"
+}
+
+variable "ami_id" {
+  type    = string
+  default = "ami-0f88e80871fd81e91"
+}
+
+variable "itype" {
+  type    = string
+  default = "t2.micro"
+}
+
+variable "ikey" {
+  type    = string
+  default = "FLM"
+}
+
+variable "izone" {
+  type    = string
+  default = "us-east-1a"
+}
+
+---------------------------------------------------------
+security.tf
+
+resource "aws_security_group" "security" {
+name = "terraform" 
+description = "addning security"
+
+ingress {
+from_port = 22
+to_port = 22
+protocol = "tcp"
+cidr_blocks = ["0.0.0.0/0"]
+}
+
+egress {
+from_port = 0
+to_port = 0
+protocol = "-1"
+cidr_blocks = ["0.0.0.0/0"]
+}
+}
